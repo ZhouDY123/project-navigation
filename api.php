@@ -23,8 +23,9 @@ function clean_category(array $data, bool $editing = false): array {
     $id = trim((string)($data['id'] ?? ''));
     $name = trim((string)($data['name'] ?? ''));
     $icon = clip(trim((string)($data['icon'] ?? '◇')), 12) ?: '◇';
-    if ($id === '' || $name === '') throw new InvalidArgumentException('分类标识和分类名称不能为空');
-    if (!preg_match('/^[a-z][a-z0-9_-]{0,31}$/', $id)) throw new InvalidArgumentException('分类标识须以小写字母开头，只能包含小写字母、数字、横线和下划线');
+    if ($name === '') throw new InvalidArgumentException('分类名称不能为空');
+    if ($id !== '' && !preg_match('/^[a-z][a-z0-9_-]{0,31}$/', $id)) throw new InvalidArgumentException('分类标识须以小写字母开头，只能包含小写字母、数字、横线和下划线');
+    if ($editing && $id === '') throw new InvalidArgumentException('分类标识不能为空');
     return [$id, clip($name, 40), $icon];
 }
 
@@ -86,6 +87,7 @@ try {
                 if (!$exists->fetchColumn()) throw new InvalidArgumentException('分类不存在');
             }
         } else {
+            if ($id === '') $id = 'category_' . bin2hex(random_bytes(4));
             $exists = $pdo->prepare('SELECT 1 FROM categories WHERE id=?'); $exists->execute([$id]);
             if ($exists->fetchColumn()) throw new InvalidArgumentException('分类标识已存在');
             $stmt = $pdo->prepare('INSERT INTO categories(id,name,icon,sort_order) VALUES(?,?,?,(SELECT COALESCE(MAX(sort_order),0)+10 FROM categories))');
