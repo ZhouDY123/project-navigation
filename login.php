@@ -2,11 +2,11 @@
 declare(strict_types=1);
 require_once __DIR__ . '/auth.php';
 
-if (is_admin()) { header('Location: admin.php'); exit; }
+if (is_admin()) { header('Location: dashboard.php'); exit; }
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (login_admin(trim((string)($_POST['username'] ?? '')), (string)($_POST['password'] ?? ''))) {
-        header('Location: admin.php'); exit;
+        header('Location: dashboard.php'); exit;
     }
     usleep(350000);
     $error = '用户名或密码不正确';
