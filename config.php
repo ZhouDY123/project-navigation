@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const APP_NAME = '项目导航';
+const APP_NAME = '三奇.项目导航';
 define('DB_PATH', PHP_SAPI === 'cli-server'
     ? __DIR__ . '/.data/devhub.sqlite'
     : '/tmp/apc_project_navigation/devhub.sqlite');
