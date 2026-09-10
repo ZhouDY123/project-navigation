@@ -19,6 +19,14 @@ function clean_project(array $data): array {
     $tags = array_values(array_unique(array_filter(array_map(fn($v) => clip(trim((string)$v), 24), (array)$tags))));
     return [clip($name,80), $url, clip(trim((string)($data['icon'] ?? '🚀')),12) ?: '🚀', clip(trim((string)($data['description'] ?? '')),240), (string)($data['category_id'] ?? ''), json_encode($tags, JSON_UNESCAPED_UNICODE), ($data['environment'] ?? 'local') === 'online' ? 'online' : 'local'];
 }
+function clean_category(array $data, bool $editing = false): array {
+    $id = trim((string)($data['id'] ?? ''));
+    $name = trim((string)($data['name'] ?? ''));
+    $icon = clip(trim((string)($data['icon'] ?? '◇')), 12) ?: '◇';
+    if ($id === '' || $name === '') throw new InvalidArgumentException('分类标识和分类名称不能为空');
+    if (!preg_match('/^[a-z][a-z0-9_-]{0,31}$/', $id)) throw new InvalidArgumentException('分类标识须以小写字母开头，只能包含小写字母、数字、横线和下划线');
+    return [$id, clip($name, 40), $icon];
+}
 
 try {
     $pdo = db(); $method = $_SERVER['REQUEST_METHOD']; $action = $_GET['action'] ?? 'list';
@@ -64,6 +72,44 @@ try {
         $stmt = $pdo->prepare('UPDATE projects SET sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=?');
         foreach ($ids as $index => $id) $stmt->execute([($index + 1) * 10, $id]);
         $pdo->commit();
+        respond(['ok'=>true]);
+    }
+    if ($method === 'POST' && $action === 'save_category') {
+        $data = input(); [$id, $name, $icon] = clean_category($data, !empty($data['original_id']));
+        $originalId = trim((string)($data['original_id'] ?? ''));
+        if ($originalId !== '') {
+            if ($id !== $originalId) throw new InvalidArgumentException('已有分类的标识不能修改');
+            $stmt = $pdo->prepare('UPDATE categories SET name=?,icon=? WHERE id=?');
+            $stmt->execute([$name,$icon,$id]);
+            if ($stmt->rowCount() === 0) {
+                $exists = $pdo->prepare('SELECT 1 FROM categories WHERE id=?'); $exists->execute([$id]);
+                if (!$exists->fetchColumn()) throw new InvalidArgumentException('分类不存在');
+            }
+        } else {
+            $exists = $pdo->prepare('SELECT 1 FROM categories WHERE id=?'); $exists->execute([$id]);
+            if ($exists->fetchColumn()) throw new InvalidArgumentException('分类标识已存在');
+            $stmt = $pdo->prepare('INSERT INTO categories(id,name,icon,sort_order) VALUES(?,?,?,(SELECT COALESCE(MAX(sort_order),0)+10 FROM categories))');
+            $stmt->execute([$id,$name,$icon]);
+        }
+        respond(['ok'=>true,'id'=>$id]);
+    }
+    if ($method === 'POST' && $action === 'reorder_categories') {
+        $ids = array_values(array_unique(array_map(fn($id) => trim((string)$id), (array)(input()['ids'] ?? []))));
+        $known = $pdo->query('SELECT id FROM categories')->fetchAll(PDO::FETCH_COLUMN);
+        $check = $ids; sort($known); sort($check);
+        if ($known !== $check) throw new InvalidArgumentException('分类排序数据无效，请刷新后重试');
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('UPDATE categories SET sort_order=? WHERE id=?');
+        foreach ($ids as $index => $id) $stmt->execute([($index + 1) * 10, $id]);
+        $pdo->commit();
+        respond(['ok'=>true]);
+    }
+    if ($method === 'DELETE' && $action === 'delete_category') {
+        $id = trim((string)($_GET['id'] ?? ''));
+        $count = $pdo->prepare('SELECT COUNT(*) FROM projects WHERE category_id=?'); $count->execute([$id]);
+        if ((int)$count->fetchColumn() > 0) throw new InvalidArgumentException('该分类下仍有项目，请先移动或删除这些项目');
+        $stmt = $pdo->prepare('DELETE FROM categories WHERE id=?'); $stmt->execute([$id]);
+        if ($stmt->rowCount() !== 1) throw new InvalidArgumentException('分类不存在');
         respond(['ok'=>true]);
     }
     if ($method === 'DELETE' && $action === 'delete') {

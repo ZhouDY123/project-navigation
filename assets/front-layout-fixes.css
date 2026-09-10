@@ -3,8 +3,8 @@
 .app-grid i{display:block;width:4px;height:4px;border-radius:1px;background:currentColor}
 body{height:100vh;min-height:0;overflow:hidden;display:flex;flex-direction:column;background-attachment:scroll}
 .sticky-zone{position:relative;z-index:20;flex:0 0 auto;background:transparent;box-shadow:none;padding-top:14px}
-.topbar{position:static!important;top:auto!important;margin-top:0}
-.fixed-container{padding-top:20px;padding-bottom:0}
+.topbar{position:relative!important;top:auto!important;margin-top:0;z-index:100}
+.fixed-container{position:relative;z-index:1;padding-top:20px;padding-bottom:0}
 .project-container{width:100%;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-top:18px;padding-bottom:70px;scrollbar-gutter:stable;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;transform:translateZ(0)}
 .project-container{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 22%,transparent) transparent}
 .project-container::-webkit-scrollbar{width:6px}
@@ -23,3 +23,9 @@ section+section{margin-top:24px}
 @media(max-width:980px){body{height:auto;min-height:100vh;overflow:auto;display:block}.sticky-zone{position:static;padding-top:10px}.fixed-container{padding-top:18px}.project-container{overflow:visible;padding-top:14px}.intro{padding-bottom:20px}}
 @media(max-width:760px){.fixed-container{padding-top:16px}.project-container{padding-top:12px}.intro{padding-bottom:18px;gap:22px}}
 @media(max-width:480px){.fixed-container{padding-top:14px}.project-container{padding-top:10px}.intro{padding-bottom:16px}}
+.sanqi-brand-mark{width:48px;height:36px;padding:5px 6px;border:1px solid rgba(255,255,255,.8);border-radius:10px;background:rgba(255,255,255,.9)!important;box-shadow:0 7px 18px rgba(35,70,145,.16)!important;overflow:hidden}
+.sanqi-brand-mark img{display:block;width:100%;height:100%;object-fit:contain}
+.brand:hover .sanqi-brand-mark{transform:translateY(-1px) scale(1.02)}
+html[data-theme=dark] .sanqi-brand-mark{background:rgba(255,255,255,.94)!important;border-color:rgba(255,255,255,.32)}
+.categories{min-width:0;overflow:visible!important;position:relative;z-index:101}.category-strip{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;white-space:nowrap}.category-strip .cat-btn{flex:0 0 auto}.more-wrap{position:relative;z-index:102;flex:0 0 auto}.more-btn{height:36px;padding:0 11px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}.more-btn:hover,.more-wrap.has-active .more-btn,.more-btn[aria-expanded=true]{background:color-mix(in srgb,var(--surface) 85%,#fff);color:var(--accent);box-shadow:0 5px 14px rgba(65,78,130,.12)}.more-menu{position:absolute;z-index:200;top:calc(100% + 10px);right:0;width:max-content;min-width:150px;max-width:260px;padding:7px;background:color-mix(in srgb,var(--surface) 94%,#fff);border:1px solid var(--line);border-radius:13px;box-shadow:0 18px 45px rgba(44,57,105,.2);backdrop-filter:blur(22px)}.more-menu[hidden]{display:none}.more-menu .menu-cat-btn{display:flex;width:100%;justify-content:space-between;text-align:left;padding:9px 10px}.more-menu .menu-cat-btn+button{margin-top:3px}.more-menu .menu-cat-btn.active{background:var(--accent-soft);box-shadow:none}
+@media(max-width:980px){.categories{order:3;width:100%;height:38px}.more-menu{right:0}}

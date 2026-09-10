@@ -1,0 +1,5 @@
+.row-actions{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.inline-delete{height:31px;border:1px solid #f0d2d9;background:#fff6f7;color:#c5485e;border-radius:8px;padding:0 11px;cursor:pointer}
+.inline-delete:hover{border-color:#dc9eac;background:#ffedef}
+.category-actions .inline-delete{padding:0 11px;border-color:#f0d2d9;background:#fff6f7;color:#c5485e}
+.category-actions .inline-delete:hover{border-color:#dc9eac;background:#ffedef}
