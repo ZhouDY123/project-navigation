@@ -1,0 +1,13 @@
+DirectoryIndex index.php index.html
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^data(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:config|db|auth)\.php$ - [F,L,NC]
+</IfModule>
+
+<FilesMatch "\.(?:sqlite|sqlite-shm|sqlite-wal|log|ini)$">
+    Require all denied
+</FilesMatch>
+
