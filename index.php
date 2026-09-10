@@ -14,7 +14,7 @@
 <body>
   <div class="sticky-zone">
   <header class="topbar">
-    <a class="brand" href="./" aria-label="返回三奇项目导航首页"><span class="brand-mark sanqi-brand-mark"><img src="assets/sanqi-logo-cropped.png" alt="三奇 3Q"></span><span class="brand-title">三奇<span class="brand-dot">.</span>项目导航<small>SANQI PROJECT NAVIGATION</small></span></a>
+    <a class="brand" href="./" aria-label="返回三奇项目导航首页"><span class="brand-mark sanqi-brand-mark"><img src="assets/sanqi-logo-cropped.png" alt="三奇 3Q"></span><span class="brand-title">三奇<span class="brand-dot" aria-hidden="true"></span>项目导航<small>SANQI PROJECT NAVIGATION</small></span></a>
     <nav id="categories" class="categories" aria-label="项目分类"></nav>
     <div class="header-actions">
       <label class="search"><span>⌕</span><input id="search" type="search" placeholder="搜索项目、描述或标签…" autocomplete="off"><kbd>/</kbd></label>
