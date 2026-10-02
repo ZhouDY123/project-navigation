@@ -55,12 +55,16 @@ function migrate(PDO $pdo): void
         SQL);
 
     $columns = $pdo->query('PRAGMA table_info(projects)')->fetchAll(PDO::FETCH_COLUMN, 1);
-    if (!in_array('is_featured', $columns, true)) $pdo->exec('ALTER TABLE projects ADD COLUMN is_featured INTEGER NOT NULL DEFAULT 1');
+    if (!in_array('is_featured', $columns, true)) $pdo->exec('ALTER TABLE projects ADD COLUMN is_featured INTEGER NOT NULL DEFAULT 0');
     if (!in_array('click_count', $columns, true)) $pdo->exec('ALTER TABLE projects ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0');
     if (!in_array('last_opened_at', $columns, true)) $pdo->exec('ALTER TABLE projects ADD COLUMN last_opened_at TEXT');
 
     $setting = $pdo->prepare('INSERT OR IGNORE INTO settings(key, value) VALUES(?, ?)');
     $setting->execute(['admin_password_hash', ADMIN_PASSWORD_HASH]);
+    if (!$pdo->query("SELECT 1 FROM settings WHERE key='featured_projects_initialized'")->fetchColumn()) {
+        $pdo->exec('UPDATE projects SET is_featured=0');
+        $setting->execute(['featured_projects_initialized', '1']);
+    }
 
     if ((int)$pdo->query('SELECT COUNT(*) FROM categories')->fetchColumn() === 0) {
         $pdo->beginTransaction();

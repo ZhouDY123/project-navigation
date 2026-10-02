@@ -17,7 +17,7 @@ function clean_project(array $data): array {
     $tags = $data['tags'] ?? [];
     if (is_string($tags)) $tags = preg_split('/[,，]/u', $tags, -1, PREG_SPLIT_NO_EMPTY);
     $tags = array_values(array_unique(array_filter(array_map(fn($v) => clip(trim((string)$v), 24), (array)$tags))));
-    return [clip($name,80), $url, clip(trim((string)($data['icon'] ?? '🚀')),12) ?: '🚀', clip(trim((string)($data['description'] ?? '')),240), (string)($data['category_id'] ?? ''), json_encode($tags, JSON_UNESCAPED_UNICODE), ($data['environment'] ?? 'local') === 'online' ? 'online' : 'local'];
+    return [clip($name,80), $url, clip(trim((string)($data['icon'] ?? '🚀')),12) ?: '🚀', clip(trim((string)($data['description'] ?? '')),240), (string)($data['category_id'] ?? ''), json_encode($tags, JSON_UNESCAPED_UNICODE), ($data['environment'] ?? 'local') === 'online' ? 'online' : 'local', !empty($data['is_featured']) ? 1 : 0];
 }
 function clean_category(array $data, bool $editing = false): array {
     $id = trim((string)($data['id'] ?? ''));
@@ -33,7 +33,7 @@ try {
     $pdo = db(); $method = $_SERVER['REQUEST_METHOD']; $action = $_GET['action'] ?? 'list';
     if ($method === 'GET' && $action === 'list') {
         $categories = $pdo->query('SELECT id,name,icon FROM categories ORDER BY sort_order,name')->fetchAll();
-        $projects = $pdo->query('SELECT id,name,url,icon,description,category_id,tags,environment,click_count,last_opened_at FROM projects ORDER BY sort_order,id')->fetchAll();
+        $projects = $pdo->query('SELECT id,name,url,icon,description,category_id,tags,environment,is_featured,click_count,last_opened_at FROM projects ORDER BY sort_order,id')->fetchAll();
         foreach ($projects as &$p) $p['tags'] = json_decode($p['tags'], true) ?: [];
         respond(['ok'=>true,'categories'=>$categories,'projects'=>$projects]);
     }
@@ -54,10 +54,10 @@ try {
         $exists=$pdo->prepare('SELECT 1 FROM categories WHERE id=?'); $exists->execute([$values[4]]);
         if (!$exists->fetchColumn()) throw new InvalidArgumentException('请选择有效分类');
         if (!empty($data['id'])) {
-            $stmt=$pdo->prepare('UPDATE projects SET name=?,url=?,icon=?,description=?,category_id=?,tags=?,environment=?,updated_at=CURRENT_TIMESTAMP WHERE id=?');
+            $stmt=$pdo->prepare('UPDATE projects SET name=?,url=?,icon=?,description=?,category_id=?,tags=?,environment=?,is_featured=?,updated_at=CURRENT_TIMESTAMP WHERE id=?');
             $stmt->execute([...$values,(int)$data['id']]); $id=(int)$data['id'];
         } else {
-            $stmt=$pdo->prepare('INSERT INTO projects(name,url,icon,description,category_id,tags,environment,sort_order) VALUES(?,?,?,?,?,?,?,(SELECT COALESCE(MAX(sort_order),0)+10 FROM projects))');
+            $stmt=$pdo->prepare('INSERT INTO projects(name,url,icon,description,category_id,tags,environment,is_featured,sort_order) VALUES(?,?,?,?,?,?,?, ?, (SELECT COALESCE(MAX(sort_order),0)+10 FROM projects))');
             $stmt->execute($values); $id=(int)$pdo->lastInsertId();
         }
         respond(['ok'=>true,'id'=>$id]);
